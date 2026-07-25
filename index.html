@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Doom Spending Tracker 💸</title>
+
+    <!-- Google Fonts: Plus Jakarta Sans -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+
+    <!-- ===== HEADER ===== -->
+    <header class="app-header">
+      <div class="header-top">
+        <div class="header-brand">
+          <span class="brand-icon">💸</span>
+          <div>
+            <h1 class="brand-title">Doom Spending Gen Z</h1>
+          </div>
+        </div>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle dark/light mode" title="Ganti tema">
+          <span class="theme-icon" id="themeIcon">🌙</span>
+        </button>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="summary-row">
+        <!-- Pemasukan -->
+        <div class="summary-card summary-income">
+          <p class="summary-label">💰 Total Pemasukan</p>
+          <p class="summary-amount" id="totalIncome">Rp 0</p>
+          <p class="summary-sub" id="incomeCount">0 pemasukan</p>
+        </div>
+        <!-- Pengeluaran -->
+        <div class="summary-card summary-expense">
+          <p class="summary-label">🔥 Total Pengeluaran</p>
+          <p class="summary-amount" id="totalAmount">Rp 0</p>
+          <p class="summary-sub" id="totalCount">0 transaksi</p>
+        </div>
+        <!-- Sisa Saldo -->
+        <div class="summary-card summary-balance">
+          <p class="summary-label">📊 Sisa Saldo</p>
+          <p class="summary-amount" id="balanceAmount">Rp 0</p>
+          <p class="summary-sub" id="balanceStatus">Aman, bro!</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="app-main">
+
+      <!-- LEFT COLUMN: Form Pemasukan + Form Pengeluaran + Chart -->
+      <section class="left-col">
+
+        <!-- Form Pemasukan Card -->
+        <div class="card form-card income-form-card">
+          <h2 class="card-title">💰 Tambah Pemasukan</h2>
+          <form id="incomeForm" novalidate>
+
+            <div class="form-group">
+              <label for="incomeName">Sumber / Keterangan</label>
+              <input
+                type="text"
+                id="incomeName"
+                placeholder="e.g. Gaji bulan ini..."
+                autocomplete="off"
+              />
+              <span class="form-error" id="incomeNameError">Wajib diisi, bro!</span>
+            </div>
+
+            <div class="form-group">
+              <label for="incomeAmount">Jumlah (Rp)</label>
+              <div class="input-prefix-wrap">
+                <span class="input-prefix">Rp</span>
+                <input
+                  type="number"
+                  id="incomeAmount"
+                  placeholder="3000000"
+                  min="1"
+                />
+              </div>
+              <span class="form-error" id="incomeAmountError">Masukkan nominal yang valid!</span>
+            </div>
+
+            <div class="form-group">
+              <label for="incomeCategory">Kategori</label>
+              <select id="incomeCategory">
+                <option value="Gaji">💼 Gaji</option>
+                <option value="Bonus">🎁 Bonus</option>
+                <option value="Uang Saku">🪙 Uang Saku</option>
+                <option value="Lain-lain">📦 Lain-lain</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="incomeDate">Tanggal</label>
+              <input type="date" id="incomeDate" />
+              <span class="form-error" id="incomeDateError">Pilih tanggal dulu!</span>
+            </div>
+
+            <button type="submit" class="btn-submit btn-submit-income">
+              <span>Catat Pemasukan</span>
+              <span>💸</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Form Pengeluaran Card -->
+        <div class="card form-card">
+          <h2 class="card-title">➕ Tambah Pengeluaran</h2>
+          <form id="spendingForm" novalidate>
+
+            <div class="form-group">
+              <label for="itemName">Nama Barang / Aktivitas</label>
+              <input
+                type="text"
+                id="itemName"
+                placeholder="e.g. Sego sambel depan kos..."
+                autocomplete="off"
+              />
+              <span class="form-error" id="nameError">Wajib diisi, bro!</span>
+            </div>
+
+            <div class="form-group">
+              <label for="itemAmount">Jumlah (Rp)</label>
+              <div class="input-prefix-wrap">
+                <span class="input-prefix">Rp</span>
+                <input
+                  type="number"
+                  id="itemAmount"
+                  placeholder="15000"
+                  min="1"
+                />
+              </div>
+              <span class="form-error" id="amountError">Masukkan nominal yang valid!</span>
+            </div>
+
+            <div class="form-group">
+              <label for="itemCategory">Kategori</label>
+              <div class="category-select-wrap">
+                <select id="itemCategory">
+                  <!-- Default categories -->
+                  <optgroup label="Kategori Dasar">
+                    <option value="Makanan">🍽️ Makanan</option>
+                    <option value="Transportasi">🚗 Transportasi</option>
+                    <option value="Hiburan">🎮 Hiburan</option>
+                  </optgroup>
+                  <!-- Custom categories injected here by JS -->
+                </select>
+                <button type="button" class="btn-add-category" id="btnAddCategory" title="Tambah kategori kustom">
+                  ＋
+                </button>
+              </div>
+              <span class="form-error" id="categoryError">Pilih kategori dulu!</span>
+            </div>
+
+            <div class="form-group">
+              <label for="itemDate">Tanggal</label>
+              <input type="date" id="itemDate" />
+              <span class="form-error" id="itemDateError">Pilih tanggal dulu!</span>
+            </div>
+
+            <button type="submit" class="btn-submit">
+              <span>Catat Pengeluaran</span>
+              <span>🔥</span>
+            </button>
+          </form>
+        </div>
+
+        <!-- Chart Card -->
+        <div class="card chart-card">
+          <div class="chart-header">
+            <h2 class="card-title">📊 Distribusi Kategori</h2>
+          </div>
+          <div class="chart-wrapper" id="chartWrapper">
+            <canvas id="spendingChart"></canvas>
+            <div class="chart-empty" id="chartEmpty">
+              <span>😶</span>
+              <p>Belum ada data buat ditampilkan</p>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- RIGHT COLUMN: Transaction List -->
+      <section class="right-col">
+        <div class="card list-card">
+          <div class="list-header">
+            <h2 class="card-title">🧾 Riwayat Transaksi</h2>
+            <div class="list-header-right">
+              <!-- Filter Tabs -->
+              <div class="filter-tabs" id="filterTabs" role="tablist">
+                <button class="filter-tab active" data-filter="all"   role="tab" aria-selected="true">Semua</button>
+                <button class="filter-tab"         data-filter="income"  role="tab" aria-selected="false">💰 Masuk</button>
+                <button class="filter-tab"         data-filter="expense" role="tab" aria-selected="false">🔥 Keluar</button>
+              </div>
+              <!-- Sort Controls -->
+              <div class="sort-controls">
+                <label for="sortSelect" class="sort-label">Urutkan:</label>
+                <select id="sortSelect" class="sort-select">
+                  <option value="newest">Terbaru</option>
+                  <option value="oldest">Terlama</option>
+                  <option value="highest">Tertinggi</option>
+                  <option value="lowest">Terendah</option>
+                  <option value="category">Kategori A–Z</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Transaction List -->
+          <div class="transaction-list" id="transactionList">
+            <!-- Empty State -->
+            <div class="empty-state" id="emptyState">
+              <span class="empty-icon">🌵</span>
+              <p class="empty-title">Belum ada pengeluaran!</p>
+              <p class="empty-sub">Selamat, dompetmu masih aman. Untuk sekarang...</p>
+            </div>
+            <!-- Items injected by JS -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ===== MODAL: Add Custom Category ===== -->
+    <div class="modal-overlay" id="categoryModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <div class="modal-box">
+        <div class="modal-header">
+          <h3 id="modalTitle">✨ Tambah Kategori Kustom</h3>
+          <button class="modal-close" id="modalClose" aria-label="Tutup modal">✕</button>
+        </div>
+
+        <p class="modal-desc">Pilih preset ala Anak Surabaya atau buat sendiri:</p>
+
+        <!-- Surabaya Presets -->
+        <div class="preset-grid" id="presetGrid">
+          <button class="preset-chip" data-preset="Nongkrong Tunjungan">☕ Nongkrong Tunjungan</button>
+          <button class="preset-chip" data-preset="Ojol Pas Hujan">🛵 Ojol Pas Hujan</button>
+          <button class="preset-chip" data-preset="Sego Sambel Malam">🍛 Sego Sambel Malam</button>
+          <button class="preset-chip" data-preset="Es Teh Pakde">🧊 Es Teh Pakde</button>
+          <button class="preset-chip" data-preset="Bakso Cak Budi">🍜 Bakso Cak Budi</button>
+          <button class="preset-chip" data-preset="Parkir Mal">🅿️ Parkir Mal</button>
+          <button class="preset-chip" data-preset="Jajan Tengah Malam">🌙 Jajan Tengah Malam</button>
+          <button class="preset-chip" data-preset="Top Up Game">🎮 Top Up Game</button>
+        </div>
+
+        <div class="modal-divider"><span>atau ketik sendiri</span></div>
+
+        <div class="modal-input-wrap">
+          <input
+            type="text"
+            id="customCategoryInput"
+            placeholder="e.g. Kopi Kenangan Receh..."
+            maxlength="30"
+          />
+          <button class="btn-modal-add" id="btnModalAdd">Tambah</button>
+        </div>
+        <span class="form-error" id="customCategoryError">Nama kategori tidak boleh kosong!</span>
+      </div>
+    </div>
+
+    <!-- ===== TOAST NOTIFICATION ===== -->
+    <div class="toast" id="toast" role="alert" aria-live="polite"></div>
+
+    <script src="js/script.js"></script>
+  </body>
+</html>
